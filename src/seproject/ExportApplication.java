@@ -18,34 +18,25 @@ import javax.swing.border.Border;
  *
  * @author Adhiraj
  */
-public class CreateAccount extends javax.swing.JFrame {
+public class ExportApplication extends javax.swing.JFrame {
 
     Login login;
-    private String userID;
 
     /**
-     * Creates new form CreateAccount
+     * Creates new form VisaApplication
      */
-    public CreateAccount() {
+    public ExportApplication() {
         initComponents();
-        userID = Main.randomString(Main.USERID_LENGTH);
         radioButtonGroup.add(maleRadioButton);
         radioButtonGroup.add(femaleRadioButton);
-        userIDField.setText(userID);
         getAllCountries();
-        this.setTitle("Create Account");
     }
 
-    public CreateAccount(Login login) {
+    public ExportApplication(Login login) {
         this.login = login;
-
-        initComponents();
-        userID = Main.randomString(Main.USERID_LENGTH);
         radioButtonGroup.add(maleRadioButton);
         radioButtonGroup.add(femaleRadioButton);
-        userIDField.setText(userID);
         getAllCountries();
-        this.setTitle("Create Account");
     }
 
     // Populates the CountryComboBox with all countries
@@ -88,16 +79,15 @@ public class CreateAccount extends javax.swing.JFrame {
         userTypeComboBox = new javax.swing.JComboBox<>();
         passwordField = new javax.swing.JPasswordField();
         confirmPasswordField = new javax.swing.JPasswordField();
-        createButton = new javax.swing.JButton();
+        submitButton = new javax.swing.JButton();
         resetButton = new javax.swing.JButton();
         dateOfBirthPicker = new org.jdesktop.swingx.JXDatePicker();
-        exitButton = new javax.swing.JButton();
         backButton = new javax.swing.JButton();
+        exitButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(500, 600));
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Create Account"));
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Export License Application"));
 
         jLabel1.setText("User ID:");
 
@@ -158,11 +148,11 @@ public class CreateAccount extends javax.swing.JFrame {
             }
         });
 
-        createButton.setText("Create");
-        createButton.setToolTipText("Create your account");
-        createButton.addActionListener(new java.awt.event.ActionListener() {
+        submitButton.setText("Submit");
+        submitButton.setToolTipText("Create your account");
+        submitButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                createButtonActionPerformed(evt);
+                submitButtonActionPerformed(evt);
             }
         });
 
@@ -211,7 +201,7 @@ public class CreateAccount extends javax.swing.JFrame {
                 .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(resetButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(createButton))
+                .addComponent(submitButton))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -255,24 +245,24 @@ public class CreateAccount extends javax.swing.JFrame {
                     .addComponent(femaleRadioButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(createButton)
+                    .addComponent(submitButton)
                     .addComponent(resetButton))
                 .addContainerGap())
         );
-
-        exitButton.setText("Exit");
-        exitButton.setToolTipText("Exit");
-        exitButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exitButtonActionPerformed(evt);
-            }
-        });
 
         backButton.setText("Back");
         backButton.setToolTipText("Go back to the previous screen");
         backButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 backButtonActionPerformed(evt);
+            }
+        });
+
+        exitButton.setText("Exit");
+        exitButton.setToolTipText("Exit");
+        exitButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exitButtonActionPerformed(evt);
             }
         });
 
@@ -305,57 +295,18 @@ public class CreateAccount extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void exitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitButtonActionPerformed
-        // TODO add your handling code here:
-        JPanel exit = new JPanel();
-        exit.setLayout(new BoxLayout(exit, BoxLayout.Y_AXIS));
-        exit.add(new JLabel("Are you sure you want to exit?"));
-        int result = JOptionPane.showConfirmDialog(this, exit, "Confirm", JOptionPane.YES_NO_OPTION);
-        if (result == JOptionPane.YES_OPTION) {
-            System.exit(0);
-        }
-    }//GEN-LAST:event_exitButtonActionPerformed
-
-    private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
-        // TODO add your handling code here:
-        if (login != null) {
-            login.setVisible(true);
-        } else {
-            JPanel exit = new JPanel();
-            exit.setLayout(new BoxLayout(exit, BoxLayout.Y_AXIS));
-            exit.add(new JLabel("Nothing to go back to, exiting instead."));
-            int result = JOptionPane.showConfirmDialog(this, exit, "Exit?", JOptionPane.YES_NO_OPTION);
-            if (result == JOptionPane.YES_OPTION) {
-                System.exit(0);
-            }
-        }
-    }//GEN-LAST:event_backButtonActionPerformed
-
-    private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetButtonActionPerformed
-        // TODO add your handling code here:
-        userIDField.setText(Main.randomString(Main.USERID_LENGTH));
-        nameField.setText("");
-        emailField.setText("");
-        passwordField.setText("");
-        confirmPasswordField.setText("");
-        dateOfBirthPicker.setDate(null);
-        countryComboBox.setSelectedIndex(0);
-        userTypeComboBox.setSelectedIndex(0);
-        radioButtonGroup.clearSelection();
-    }//GEN-LAST:event_resetButtonActionPerformed
-
-    private void confirmPasswordFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_confirmPasswordFieldKeyReleased
+    private void emailFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_emailFieldKeyReleased
         // TODO add your handling code here:
         // Default border
         Border border = userIDField.getBorder();
-        if (!(confirmPasswordField.getPassword() == passwordField.getPassword())) {
+        if (!Main.validateEmailID(emailField.getText())) {
             border = BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(Color.red),
                     // To account for the default border margins
                     BorderFactory.createEmptyBorder(0, 5, 0, 5));
         }
-        confirmPasswordField.setBorder(border);
-    }//GEN-LAST:event_confirmPasswordFieldKeyReleased
+        emailField.setBorder(border);
+    }//GEN-LAST:event_emailFieldKeyReleased
 
     private void passwordFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_passwordFieldKeyReleased
         // TODO add your handling code here:
@@ -370,20 +321,20 @@ public class CreateAccount extends javax.swing.JFrame {
         confirmPasswordField.setBorder(border);
     }//GEN-LAST:event_passwordFieldKeyReleased
 
-    private void emailFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_emailFieldKeyReleased
+    private void confirmPasswordFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_confirmPasswordFieldKeyReleased
         // TODO add your handling code here:
         // Default border
         Border border = userIDField.getBorder();
-        if (!Main.validateEmailID(emailField.getText())) {
+        if (!(confirmPasswordField.getPassword() == passwordField.getPassword())) {
             border = BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(Color.red),
                     // To account for the default border margins
                     BorderFactory.createEmptyBorder(0, 5, 0, 5));
         }
-        emailField.setBorder(border);
-    }//GEN-LAST:event_emailFieldKeyReleased
+        confirmPasswordField.setBorder(border);
+    }//GEN-LAST:event_confirmPasswordFieldKeyReleased
 
-    private void createButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createButtonActionPerformed
+    private void submitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitButtonActionPerformed
         // TODO add your handling code here:
         JPanel message = new JPanel();
         message.setLayout(new BoxLayout(message, BoxLayout.Y_AXIS));
@@ -404,7 +355,46 @@ public class CreateAccount extends javax.swing.JFrame {
             radioButtonGroup.getSelection();
             dateOfBirthPicker.getDate();
         }
-    }//GEN-LAST:event_createButtonActionPerformed
+    }//GEN-LAST:event_submitButtonActionPerformed
+
+    private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetButtonActionPerformed
+        // TODO add your handling code here:
+        userIDField.setText(Main.randomString(Main.USERID_LENGTH));
+        nameField.setText("");
+        emailField.setText("");
+        passwordField.setText("");
+        confirmPasswordField.setText("");
+        dateOfBirthPicker.setDate(null);
+        countryComboBox.setSelectedIndex(0);
+        userTypeComboBox.setSelectedIndex(0);
+        radioButtonGroup.clearSelection();
+    }//GEN-LAST:event_resetButtonActionPerformed
+
+    private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
+        // TODO add your handling code here:
+        if (login != null) {
+            login.setVisible(true);
+        } else {
+            JPanel exit = new JPanel();
+            exit.setLayout(new BoxLayout(exit, BoxLayout.Y_AXIS));
+            exit.add(new JLabel("Nothing to go back to, exiting instead."));
+            int result = JOptionPane.showConfirmDialog(this, exit, "Exit?", JOptionPane.YES_NO_OPTION);
+            if (result == JOptionPane.YES_OPTION) {
+                System.exit(0);
+            }
+        }
+    }//GEN-LAST:event_backButtonActionPerformed
+
+    private void exitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitButtonActionPerformed
+        // TODO add your handling code here:
+        JPanel exit = new JPanel();
+        exit.setLayout(new BoxLayout(exit, BoxLayout.Y_AXIS));
+        exit.add(new JLabel("Are you sure you want to exit?"));
+        int result = JOptionPane.showConfirmDialog(this, exit, "Confirm", JOptionPane.YES_NO_OPTION);
+        if (result == JOptionPane.YES_OPTION) {
+            System.exit(0);
+        }
+    }//GEN-LAST:event_exitButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -415,35 +405,26 @@ public class CreateAccount extends javax.swing.JFrame {
          */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /*
-         * If Nimbus (introduced in Java SE 6) is not available, stay with the
-         * default look and feel.
-         * For details see
-         * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
+         * If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
-
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(CreateAccount.class
-                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
-
+            java.util.logging.Logger.getLogger(ExportApplication.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(CreateAccount.class
-                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
-
+            java.util.logging.Logger.getLogger(ExportApplication.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(CreateAccount.class
-                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
-
+            java.util.logging.Logger.getLogger(ExportApplication.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(CreateAccount.class
-                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ExportApplication.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /*
@@ -451,7 +432,7 @@ public class CreateAccount extends javax.swing.JFrame {
          */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new CreateAccount().setVisible(true);
+                new ExportApplication().setVisible(true);
             }
         });
     }
@@ -460,7 +441,6 @@ public class CreateAccount extends javax.swing.JFrame {
     private javax.swing.JButton backButton;
     private javax.swing.JPasswordField confirmPasswordField;
     private javax.swing.JComboBox<String> countryComboBox;
-    private javax.swing.JButton createButton;
     private org.jdesktop.swingx.JXDatePicker dateOfBirthPicker;
     private javax.swing.JTextField emailField;
     private javax.swing.JButton exitButton;
@@ -480,6 +460,7 @@ public class CreateAccount extends javax.swing.JFrame {
     private javax.swing.JPasswordField passwordField;
     private javax.swing.ButtonGroup radioButtonGroup;
     private javax.swing.JButton resetButton;
+    private javax.swing.JButton submitButton;
     private javax.swing.JTextField userIDField;
     private javax.swing.JComboBox<String> userTypeComboBox;
     // End of variables declaration//GEN-END:variables
