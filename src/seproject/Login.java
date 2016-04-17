@@ -5,6 +5,9 @@
  */
 package seproject;
 
+import java.security.MessageDigest;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -21,7 +24,6 @@ public class Login extends javax.swing.JFrame {
      */
     public Login() {
         initComponents();
-        this.setTitle("Login");
     }
 
     /**
@@ -128,13 +130,40 @@ public class Login extends javax.swing.JFrame {
             message.add(new JLabel("Email ID not valid"));
             JOptionPane.showConfirmDialog(this, message, "Error", JOptionPane.OK_CANCEL_OPTION);
         } else {
-            loginPane.getUserName();
-            loginPane.getPassword();
-
-            // Get User Type from the database
-            String userType = "citizen";
-            new Home(userType).setVisible(true);
-            this.setVisible(false);
+            try {
+                String uname = loginPane.getUserName();
+                char[] pword = loginPane.getPassword();
+                String checkPass = new String(pword);
+                MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+                messageDigest.update(checkPass.getBytes());
+                byte[] passwordBytes = messageDigest.digest();
+                StringBuilder stringBuilder = new StringBuilder();
+                for (int i = 0; i < passwordBytes.length; i++) {
+                    stringBuilder.append(Integer.toString((passwordBytes[i] & 0xff) + 0x100, 16).substring(1));
+                }
+                String hashedPassword = stringBuilder.toString();
+                MySQLAccess msa = new MySQLAccess();
+                msa.loadDatabase();
+                msa.preparedStatement = msa.connect.prepareStatement("select * from user where emailID = ? and password = ?");
+                msa.preparedStatement.setString(1, uname);
+                msa.preparedStatement.setString(2, hashedPassword);
+                msa.resultSet = msa.preparedStatement.executeQuery();
+                if (msa.resultSet.first() == false) {
+                    message.add(new JLabel("Invalid credentials!"));
+                    JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.OK_OPTION);
+                    resetButton.doClick();
+                } else {
+                    msa.resultSet.absolute(1);
+                    String uType = msa.resultSet.getString(7);
+                    message.add(new JLabel("Success! Logged in as " + uType));
+                    JOptionPane.showConfirmDialog(this, message, "Success", JOptionPane.OK_OPTION);
+                    Home home = new Home(uType, uname);
+                    home.setVisible(true);
+                    this.setVisible(false);
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(Login.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }//GEN-LAST:event_loginButtonActionPerformed
 
@@ -170,10 +199,8 @@ public class Login extends javax.swing.JFrame {
          */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /*
-         * If Nimbus (introduced in Java SE 6) is not available, stay with the
-         * default look and feel.
-         * For details see
-         * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
+         * If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {

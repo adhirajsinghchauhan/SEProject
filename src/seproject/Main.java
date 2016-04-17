@@ -27,7 +27,7 @@ public class Main extends Application {
 
     //  Start: Utility functions
     private static final String EMAIL_REGEX = "^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$";
-    private static final String CHARACTER_SET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final String CHARACTER_SET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final SecureRandom secureRandom = new SecureRandom();
     static final int USERID_LENGTH = 5;
 
@@ -50,7 +50,7 @@ public class Main extends Application {
     // End: Utility functions
 
     @Override
-    public void start(Stage primaryStage) {
+    public void start(final Stage primaryStage) {
         Button btn = new Button();
         btn.setText("Get Started");
         btn.setOnAction(new EventHandler<ActionEvent>() {
@@ -74,18 +74,19 @@ public class Main extends Application {
 
     // Populates the table with the results of the SQL statement
     public static DefaultTableModel buildTableModel(ResultSet rs) throws SQLException {
+
         ResultSetMetaData metaData = rs.getMetaData();
         // Names of columns
-        Vector<String> columnNames = new Vector<String>();
+        Vector<String> columnNames = new Vector<>();
         int columnCount = metaData.getColumnCount();
         for (int i = 1; i <= columnCount; i++) {
             columnNames.add(metaData.getColumnName(i));
         }
 
         // Data of the table
-        Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+        Vector<Vector<Object>> data = new Vector<>();
         while (rs.next()) {
-            Vector<Object> vector = new Vector<Object>();
+            Vector<Object> vector = new Vector<>();
             for (int i = 1; i <= columnCount; i++) {
                 vector.add(rs.getObject(i));
             }

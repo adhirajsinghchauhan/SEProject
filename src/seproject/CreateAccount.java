@@ -6,7 +6,10 @@
 package seproject;
 
 import java.awt.Color;
+import java.security.MessageDigest;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -33,7 +36,6 @@ public class CreateAccount extends javax.swing.JFrame {
         radioButtonGroup.add(femaleRadioButton);
         userIDField.setText(userID);
         getAllCountries();
-        this.setTitle("Create Account");
     }
 
     public CreateAccount(Login login) {
@@ -45,7 +47,6 @@ public class CreateAccount extends javax.swing.JFrame {
         radioButtonGroup.add(femaleRadioButton);
         userIDField.setText(userID);
         getAllCountries();
-        this.setTitle("Create Account");
     }
 
     // Populates the CountryComboBox with all countries
@@ -141,7 +142,7 @@ public class CreateAccount extends javax.swing.JFrame {
         countryComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select" }));
         countryComboBox.setToolTipText("Select nationality");
 
-        userTypeComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select", "Government", "Citizen", "Country", "State" }));
+        userTypeComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Select", "Government Official", "Citizen", "Trader" }));
         userTypeComboBox.setToolTipText("Select type");
 
         passwordField.setToolTipText("Enter a password");
@@ -348,7 +349,7 @@ public class CreateAccount extends javax.swing.JFrame {
         // TODO add your handling code here:
         // Default border
         Border border = userIDField.getBorder();
-        if (!(confirmPasswordField.getPassword() == passwordField.getPassword())) {
+        if (!confirmPasswordField.getText().equals(passwordField.getText())) {
             border = BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(Color.red),
                     // To account for the default border margins
@@ -361,7 +362,7 @@ public class CreateAccount extends javax.swing.JFrame {
         // TODO add your handling code here:
         // Default border
         Border border = userIDField.getBorder();
-        if (!(confirmPasswordField.getPassword() == passwordField.getPassword())) {
+        if (!confirmPasswordField.getText().equals(passwordField.getText())) {
             border = BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(Color.red),
                     // To account for the default border margins
@@ -389,20 +390,126 @@ public class CreateAccount extends javax.swing.JFrame {
         message.setLayout(new BoxLayout(message, BoxLayout.Y_AXIS));
         boolean validEmailID = Main.validateEmailID(emailField.getText());
 
-        if (emailField.getText().equals("") || passwordField.getPassword().equals("") || nameField.getText().equals("") || !(confirmPasswordField.getPassword() == passwordField.getPassword()) || countryComboBox.getSelectedIndex() == 0 || userTypeComboBox.getSelectedIndex() == 0 || radioButtonGroup.getSelection() == null) {
+        if (emailField.getText().equals("") || passwordField.getText().equals("") || nameField.getText().equals("") || !confirmPasswordField.getText().equals(passwordField.getText()) || countryComboBox.getSelectedIndex() == 0 || userTypeComboBox.getSelectedIndex() == 0 || radioButtonGroup.getSelection() == null) {
             message.add(new JLabel("Some fields are empty."));
             JOptionPane.showConfirmDialog(this, message, "Confirm Details", JOptionPane.OK_CANCEL_OPTION);
         } else if (!validEmailID) {
             message.add(new JLabel("Email ID not valid"));
             JOptionPane.showConfirmDialog(this, message, "Error", JOptionPane.OK_CANCEL_OPTION);
         } else {
-            nameField.getText();
-            emailField.getText();
-            passwordField.getPassword();
-            countryComboBox.getSelectedItem();
-            userTypeComboBox.getSelectedItem();
-            radioButtonGroup.getSelection();
-            dateOfBirthPicker.getDate();
+            try {
+                userID = userIDField.getText();
+                String name = nameField.getText();
+                String email = emailField.getText();
+                String password = passwordField.getText();
+                MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+                messageDigest.update(password.getBytes());
+                byte[] passwordBytes = messageDigest.digest();
+                StringBuilder stringBuilder = new StringBuilder();
+                for (int i = 0; i < passwordBytes.length; i++) {
+                    stringBuilder.append(Integer.toString((passwordBytes[i] & 0xff) + 0x100, 16).substring(1));
+                }
+                String hashedPassword = stringBuilder.toString();
+                String country = countryComboBox.getItemAt(countryComboBox.getSelectedIndex());
+                String uType = userTypeComboBox.getItemAt(userTypeComboBox.getSelectedIndex());
+                String gender = null;
+                if (maleRadioButton.isSelected()) {
+                    gender = "Male";
+                } else if (femaleRadioButton.isSelected()) {
+                    gender = "Female";
+                }
+                java.util.Date dob = dateOfBirthPicker.getDate();
+                java.sql.Date dateOfBirth = new java.sql.Date(dob.getTime());
+                MySQLAccess msa = new MySQLAccess();
+                msa.loadDatabase();
+                msa.preparedStatement = msa.connect.prepareStatement("select * from user where emailID = ?");
+                msa.preparedStatement.setString(1, email);
+                msa.resultSet = msa.preparedStatement.executeQuery();
+                if (msa.resultSet.first() == true) {
+                    message.add(new JLabel("This e-mail ID is already in use."));
+                    JOptionPane.showConfirmDialog(this, message, "Cannot create account", JOptionPane.OK_CANCEL_OPTION);
+                    msa.close();
+                    resetButton.doClick();
+                }
+                if (uType.equals("Government Official")) {
+                    msa.preparedStatement = msa.connect.prepareStatement("select * from user where country = ? and userType = ?");
+                    msa.preparedStatement.setString(1, country);
+                    msa.preparedStatement.setString(2, uType);
+                    msa.resultSet = msa.preparedStatement.executeQuery();
+                    if (msa.resultSet.first() == true) {
+                        message.add(new JLabel("A government official from this country is already registered."));
+                        JOptionPane.showConfirmDialog(this, message, "Cannot create account", JOptionPane.OK_CANCEL_OPTION);
+                        msa.close();
+                        resetButton.doClick();
+                    } else {
+                        msa.preparedStatement = msa.connect.prepareStatement("insert into user values(?,?,?,?,?,?,?,?)");
+                        msa.preparedStatement.setString(1, userID);
+                        msa.preparedStatement.setString(2, name);
+                        msa.preparedStatement.setString(3, email);
+                        msa.preparedStatement.setString(4, hashedPassword);
+                        msa.preparedStatement.setDate(5, dateOfBirth);
+                        msa.preparedStatement.setString(6, country);
+                        msa.preparedStatement.setString(7, uType);
+                        msa.preparedStatement.setString(8, gender);
+                        msa.preparedStatement.executeUpdate();
+                        message.add(new JLabel("Do you want to login?"));
+                        int result = JOptionPane.showConfirmDialog(this, message, "Success", JOptionPane.YES_NO_OPTION);
+                        if (result == JOptionPane.YES_OPTION) {
+                            if (login == null) {
+                                new Login().setVisible(true);
+                            } else {
+                                login.setVisible(true);
+                            }
+                            this.setVisible(false);
+                        }
+                        msa.close();
+                        resetButton.doClick();
+                    }
+                } else {
+                    boolean userIDChanged = false;
+                    while (true) {
+                        msa.preparedStatement = msa.connect.prepareStatement("select * from user where userID = ?");
+                        msa.preparedStatement.setString((1), userID);
+                        msa.resultSet = msa.preparedStatement.executeQuery();
+                        if (msa.resultSet.first() == true) {
+                            userID = Main.randomString(Main.USERID_LENGTH);
+                            userIDField.setText(userID);
+                            userIDChanged = true;
+                        } else {
+                            break;
+                        }
+                    }
+                    if (userIDChanged == true) {
+                        message.add(new JLabel("UserID already in use. It has been regenerated."));
+                        JOptionPane.showConfirmDialog(this, message, "ID Changed", JOptionPane.OK_OPTION);
+                    }
+                    msa.preparedStatement = msa.connect.prepareStatement("insert into user values(?,?,?,?,?,?,?,?)");
+                    msa.preparedStatement.setString(1, userID);
+                    msa.preparedStatement.setString(2, name);
+                    msa.preparedStatement.setString(3, email);
+                    msa.preparedStatement.setString(4, hashedPassword);
+                    msa.preparedStatement.setDate(5, dateOfBirth);
+                    msa.preparedStatement.setString(6, country);
+                    msa.preparedStatement.setString(7, uType);
+                    msa.preparedStatement.setString(8, gender);
+                    msa.preparedStatement.executeUpdate();
+                    message.add(new JLabel("Do you want to login?"));
+                    int result = JOptionPane.showConfirmDialog(this, message, "Success", JOptionPane.YES_NO_OPTION);
+                    if (result == JOptionPane.YES_OPTION) {
+                        if (login == null) {
+                            new Login().setVisible(true);
+                        } else {
+                            login.setVisible(true);
+                        }
+                        this.setVisible(false);
+                    }
+                    msa.close();
+                    resetButton.doClick();
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(CreateAccount.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
         }
     }//GEN-LAST:event_createButtonActionPerformed
 
@@ -415,10 +522,8 @@ public class CreateAccount extends javax.swing.JFrame {
          */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /*
-         * If Nimbus (introduced in Java SE 6) is not available, stay with the
-         * default look and feel.
-         * For details see
-         * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
+         * If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -428,28 +533,20 @@ public class CreateAccount extends javax.swing.JFrame {
 
                 }
             }
-        } catch (ClassNotFoundException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(CreateAccount.class
                     .getName()).log(java.util.logging.Level.SEVERE, null, ex);
 
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(CreateAccount.class
-                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
-
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(CreateAccount.class
-                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
-
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(CreateAccount.class
-                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+
         //</editor-fold>
 
         /*
          * Create and display the form
          */
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 new CreateAccount().setVisible(true);
             }
